@@ -1,0 +1,13 @@
+[project]
+name = "data-visualization-agent"
+version = "0.1.0"
+description = "LangChain and LangGraph project for data visualization"
+readme = "README.md"
+requires-python = ">=3.15"
+dependencies = [
+    "langchain",
+    "langgraph",
+    "python-dotenv",
+    "langchain-core",
+    "docker"
+]

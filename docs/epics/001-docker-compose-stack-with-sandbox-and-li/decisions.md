@@ -34,3 +34,27 @@ The architect's two questions for the user, after the design revision that intro
 1. Does the OAuth beta header count as protocol or identity? The user answered: "treat as protocol".
 2. What happens if Anthropic blocks the requests? The user answered: "if Anthropic blocks the requests do not configure claude in litellm". When asked whether that means stopping the epic or shipping the rest, the user chose "Ship the rest without Claude".
 The brief was changed and re-approved by the user ("yes, approve all including 10"): the goal and Done-when 4 are now conditional on the token test, assumption 5 is replaced by constraints, and new assumption 10 treats "LiteLLM cannot present the token" like a block.
+
+## 2026-11-26 · block-answer
+G2 fact sheet, continued (rows 10 to 13), drafted by the session from primary sources on 2026-11-26:
+10. Messages endpoint: `POST https://api.anthropic.com/v1/messages`. The docs show the path `/v1/messages` (https://platform.claude.com/docs/en/api/messages). Version header `anthropic-version`. LiteLLM v1.108.18 sends `2023-06-01` (`litellm/llms/anthropic/common_utils.py`, `get_anthropic_headers`: `"anthropic-version": anthropic_version or "2023-06-01"`); the versions page lists `2026-10-21` as the newest (https://platform.claude.com/docs/en/api/versioning). G2a sends `2023-06-01`, as LiteLLM does.
+11. OAuth headers that LiteLLM v1.108.18 sends when the credential starts with `sk-ant-oat` (`optionally_handle_anthropic_oauth` in `litellm/llms/anthropic/common_utils.py`; constants in `litellm/types/llms/anthropic.py`):
+    - `authorization: Bearer <token>`;
+    - `anthropic-beta: oauth-2025-04-20`, which contains no Claude Code flag;
+    - `anthropic-dangerous-direct-browser-access: true`.
+    LiteLLM sets no `user-agent` of its own in that code.
+12. Config keys:
+    - W1: `litellm_params.api_key`, which accepts `os.environ/NAME` (documented, https://docs.litellm.ai/docs/proxy/configs). The source detects the `sk-ant-oat` prefix; whether a configured key takes that code path is unverified.
+    - W2: `litellm_params.extra_headers`, shown in a config example. Whether a header value accepts `os.environ/NAME` is unverified.
+13. Postgres: `postgres:16`, with the data volume at `/var/lib/postgresql/data`, as in LiteLLM's official compose files (https://github.com/BerriAI/litellm/blob/f52f26d9c636038c6e3609cc7d17cf625d434c3e/docker/docker-compose.quickstart.yml). From major 18 the image mounts at `/var/lib/postgresql` instead (https://hub.docker.com/_/postgres), so the stack stays on 16.
+
+## 2026-11-26 · block-answer
+Question: is `anthropic-dangerous-direct-browser-access: true` protocol or identity? LiteLLM adds it in its OAuth path, it does not name Claude Code, and it was on neither list of ADR 0003. The user answered: "treat it as protocol".
+The allowed upstream headers are therefore:
+- the bearer authorization;
+- `anthropic-version`;
+- `anthropic-beta: oauth-2025-04-20`;
+- `anthropic-dangerous-direct-browser-access: true`;
+- the client's default user agent, provided it does not name Claude Code.
+
+G2a sends exactly these headers. Under wiring W2, the static headers may include this third header, so item 02's "exactly two static headers" reads as "exactly these three" if W2 needs it.

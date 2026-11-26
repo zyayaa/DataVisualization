@@ -55,7 +55,7 @@ Wiring: W1 | W2 | none
 | Verdict, wiring | `env.example` names | `litellm` keys beyond the base | `litellm/config.yaml` |
 |---|---|---|---|
 | Build with Claude, W1 | base five and `CLAUDE_CODE_OAUTH_TOKEN` | `CLAUDE_CODE_OAUTH_TOKEN` | three deployments; credential `os.environ/CLAUDE_CODE_OAUTH_TOKEN`; no static header |
-| Build with Claude, W2 | the same six | `CLAUDE_UPSTREAM_AUTHORIZATION`, value `Bearer ${CLAUDE_CODE_OAUTH_TOKEN:?…}` | three deployments; exactly two static headers: authorization as `os.environ/CLAUDE_UPSTREAM_AUTHORIZATION`, and the OAuth beta header of row 11 |
+| Build with Claude, W2 | the same six | `CLAUDE_UPSTREAM_AUTHORIZATION`, value `Bearer ${CLAUDE_CODE_OAUTH_TOKEN:?…}` | three deployments; static headers: authorization as `os.environ/CLAUDE_UPSTREAM_AUTHORIZATION`, the OAuth beta header of row 11, plus `anthropic-dangerous-direct-browser-access: true` if the recorded passing form used it (decisions.md, 2026-11-26) |
 | No Claude | base five | none | no model, no `os.environ/` reference |
 
 **Identity rule (ADR 0003).**
@@ -214,12 +214,12 @@ def container_env_names(docker_compose) -> Callable[[str], set[str]]  # service 
   - Models match the verdict. Build: `litellm/config.yaml` defines exactly the aliases `opus`, `sonnet` and `haiku`, mapped to `anthropic/claude-opus-5-5`, `anthropic/claude-sonnet-5-5` and `anthropic/claude-haiku-5-5`. No Claude: it defines no model. (command)
   - The secret set matches the verdict. Build: the names in `env.example` are exactly the base five and `CLAUDE_CODE_OAUTH_TOKEN`, and the token's comment names `claude setup-token` and says the token expires. No Claude: the names are exactly the base five, and the file does not mention the token. (command)
   - The `litellm` environment matches the verdict and wiring. W1: exactly the base keys and `CLAUDE_CODE_OAUTH_TOKEN` as `${CLAUDE_CODE_OAUTH_TOKEN:?…}`. W2: exactly the base keys and `CLAUDE_UPSTREAM_AUTHORIZATION` as `Bearer ${CLAUDE_CODE_OAUTH_TOKEN:?…}`. No Claude: exactly the base keys. In every case no other service interpolates the token. (command)
-  - The upstream wiring matches the verdict. W1: every deployment's credential, under the key name of row 12, is `os.environ/CLAUDE_CODE_OAUTH_TOKEN`, and no deployment carries a static header. W2: every deployment's static headers are exactly two, the authorization as `os.environ/CLAUDE_UPSTREAM_AUTHORIZATION` and the OAuth beta header with exactly the name and value of row 11. No Claude: the file holds no `os.environ/` reference. (command)
+  - The upstream wiring matches the verdict. W1: every deployment's credential, under the key name of row 12, is `os.environ/CLAUDE_CODE_OAUTH_TOKEN`, and no deployment carries a static header. W2: every deployment's static headers are exactly the authorization as `os.environ/CLAUDE_UPSTREAM_AUTHORIZATION` and the OAuth beta header with exactly the name and value of row 11, plus `anthropic-dangerous-direct-browser-access: true` if the recorded passing form used it (decisions.md, 2026-11-26). No Claude: the file holds no `os.environ/` reference. (command)
   - With `STACK_TESTS` unset, pytest run on `tests/stack/test_claude.py` exits 0, runs no test, and reports as skipped the four tests the stack-suite contract names for slice 02. (test)
   - With `STACK_TESTS` unset, `uv run --with pytest pytest` exits 0, slice 01's tests included and unchanged. (command)
 - Edge cases:
   - Files: no probe verdict record in `decisions.md`. Stop with `BLOCKED`; the arm is never guessed.
-  - Files: the recorded passing form needs anything beyond W1's one credential reference or W2's two headers (a third header, a value written into the file, custom code). Stop with `BLOCKED`; there is no third wiring.
+  - Files: the recorded passing form needs anything beyond W1's one credential reference or W2's listed headers (any other header, a value written into the file, custom code). Stop with `BLOCKED`; there is no third wiring.
   - Files: the token's value never appears in a committed file. Only its name does.
   - Live (person), Build: an alias fails with an upstream authentication error, or an error saying the credential is only for Claude Code. Repeat the G2a request first: it separates an expired token from a block. If G2a now fails on a credential or client ground, report it; the outcome is a new verdict record and a replan. Never add an identity header, a user agent, a system prompt or an API key.
   - Live (person), Build: an alias the subscription plan does not cover fails at request time. Report it as a block; the alias is not deleted silently.

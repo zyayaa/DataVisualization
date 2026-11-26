@@ -14,7 +14,7 @@ Two questions are open, and they are separate:
 
 A request that succeeds through LiteLLM answers neither cleanly, because it does not show what LiteLLM sent upstream. The plan's risk list also records an unchecked recollection that Anthropic accepts subscription tokens only from requests that identify as Claude Code. If that is right, the probe ends at the first question, and LiteLLM gets no Claude model.
 ## Decision
-G2 is a probe that a person runs before slice 01 is built. Its verdict decides whether slice 01 configures Claude; slice 01 is built either way. Its files and the token stay outside the repository.
+G2 is a probe that a person runs before slice 01 is built. Its verdict decides whether slice 02 configures Claude; slices 01 and 03 are the same either way, apart from slice 01's image tag and slice 03's README. Its files and the token stay outside the repository.
 
 - **G2a, control.** One request from the host straight to Anthropic's Messages API: bearer authorization with a fresh token, the API version header, the OAuth beta header exactly as LiteLLM adds it, one short user message to `claude-haiku-5-5`, no system prompt, no user-agent override, no other header.
 - **G2b, proxy.** One throwaway LiteLLM container at the pinned tag, with one alias and a throwaway master key, and one chat-completion request. Two config-only wirings are tried in order: the token as the deployment's credential (W1), then static bearer and OAuth beta headers on the deployment (W2). If both fail for a LiteLLM-side reason, they may be tried once more on `v1.111.0`, the only other release the fact sheet names. Nothing else is tried.
@@ -27,7 +27,7 @@ Verdicts:
 
 The result goes into `decisions.md` as a `block-answer`: status codes, error types, the wiring and the tag. Never the token. No verbose or trace output is used, because it prints the authorization header.
 ## Alternative rejected
-Build the whole stack first and let Done-when 4 reveal whether the token works. It needs no separate step and tests the real stack. It lost because it builds the Claude wiring of slice 01 before the one question that decides it is answered, and a late failure creates pressure to "just use an API key", which the brief forbids. It also cannot show that the proxy sent no identity: only a control request that bypasses the proxy can. The probe costs one direct request, one `docker run` and at most a handful of proxy requests.
+Build the whole stack first and let Done-when 4 reveal whether the token works. It needs no separate step and tests the real stack. It lost because it builds the Claude wiring of slice 02 before the one question that decides it is answered, and a late failure creates pressure to "just use an API key", which the brief forbids. It also cannot show that the proxy sent no identity: only a control request that bypasses the proxy can. The probe costs one direct request, one `docker run` and at most a handful of proxy requests.
 
 A proxy probe without the control request was also considered. It is one step fewer, but a failure would not say whether Anthropic or LiteLLM refused, and a pass would not prove the no-impersonation rule.
 ## Consequences

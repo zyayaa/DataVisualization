@@ -169,7 +169,7 @@ Rules the compose file and the config must hold to:
 
 `env.example` states that character rule for every generated value, the `sk-` prefix for the master key, and "set once" for the salt key. A missing variable makes `docker compose up` fail at once with the `:?` message, instead of starting a half-configured proxy.
 
-**The subscription-token gate (ADR 0003, ADR 0007).** Steps run in this order. The probe runs before slice 01 is built, and its verdict decides whether slice 01 configures Claude. Slice 01 is built either way.
+**The subscription-token gate (ADR 0003, ADR 0007).** Steps run in this order. The probe runs before slice 01 is built, and its verdict decides whether slice 02 configures Claude. Every slice is built either way.
 
 - **G1, terms.** Answered by the user twice, the second time with the legal page in front of them (`decisions.md`). No agent can give this answer.
 - **Fact-sheet completion.** The session adds, from primary sources, the facts the probe needs and the sheet lacks:

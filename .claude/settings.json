@@ -1,5 +1,25 @@
 {
   "enabledPlugins": {
     "sdlc@sdlc-tools": true
+  },
+  "permissions": {
+    "allow": [
+      "Bash(sdlc-*)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr checks *)",
+      "Bash(pytest *)",
+      "Bash(ruff *)",
+      "Bash(mypy *)",
+      "Bash(uv *)"
+    ],
+    "deny": [
+      "Bash(gh pr merge *)",
+      "Bash(git push --force *)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
   }
 }

@@ -28,3 +28,9 @@ Gate G2 fact sheet, drafted by the session from primary sources on 2026-11-26:
 8. Postgres major and data directory: not verified.
 9. Readiness: `GET /health/readiness`, no auth, 503 when the database is unreachable. (https://docs.litellm.ai/docs/proxy/health)
 Under ADR 0003 as written, row 2 stops the epic. The user chose to continue (entry above), so ADR 0003 goes back to the design stage.
+
+## 2026-11-26 · block-answer
+The architect's two questions for the user, after the design revision that introduced the live probe (ADR 0007):
+1. Does the OAuth beta header count as protocol or identity? The user answered: "treat as protocol".
+2. What happens if Anthropic blocks the requests? The user answered: "if Anthropic blocks the requests do not configure claude in litellm". When asked whether that means stopping the epic or shipping the rest, the user chose "Ship the rest without Claude".
+The brief was changed and re-approved by the user ("yes, approve all including 10"): the goal and Done-when 4 are now conditional on the token test, assumption 5 is replaced by constraints, and new assumption 10 treats "LiteLLM cannot present the token" like a block.

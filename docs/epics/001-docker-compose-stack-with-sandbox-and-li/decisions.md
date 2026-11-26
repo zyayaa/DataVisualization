@@ -58,3 +58,16 @@ The allowed upstream headers are therefore:
 - the client's default user agent, provided it does not name Claude Code.
 
 G2a sends exactly these headers. Under wiring W2, the static headers may include this third header, so item 02's "exactly two static headers" reads as "exactly these three" if W2 needs it.
+
+## 2026-11-26 · block-answer
+Probe verdict record (ADR 0007), the newest one for this epic:
+```
+G2a: 429 rate_limit_error
+G2b: not run
+Verdict: No Claude
+Tag: v1.108.18
+Wiring: none
+```
+G2a was run once by the user, with the headers of fact-sheet rows 10 and 11, against `claude-haiku-5-5`. It returned HTTP 429 with the body `{"type":"error","error":{"type":"rate_limit_error","message":"Error"}}`. Under ADR 0007 a 429 alone is not a verdict. The user decided instead, in their words: "do not configure claude for litellm. Let's just deploy litellm and I will investigate".
+So item 01 pins `ghcr.io/berriai/litellm:v1.108.18`, item 02 builds the "No Claude" arm (no model, no token, guard tests only), and item 03 writes the README's "No Claude" arm.
+Configuring Claude later needs a new verdict record and a replan, or a new epic, after the user's investigation.

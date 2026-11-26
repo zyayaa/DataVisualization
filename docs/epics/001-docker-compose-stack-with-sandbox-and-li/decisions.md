@@ -8,3 +8,6 @@ Answer from the user: "use the subscription token". The user made this call them
 
 ## 2026-11-26 · block-answer
 The staged `sandbox/Dockerfile` blocked the design save. The user answered: "you can commit to the branch". It is committed unchanged on the spec branch, so it reaches main with the spec pull request instead of with an item (this refines brief assumption 8).
+
+## 2026-11-26 · block-answer
+`sdlc-spec-pr` refused the spec branch because it carried `sandbox/Dockerfile`. The user chose to split it out: the file was removed from the spec branch and added unchanged through its own pull request (#3), which must merge before epic 001 is implemented. This supersedes the earlier entry that committed it on the spec branch. The items still treat the Dockerfile as existing code.

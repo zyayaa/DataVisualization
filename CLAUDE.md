@@ -11,6 +11,5 @@ LangChain/LangGraph project for data visualization (early scaffold). Python, man
 ## Traps
 
 - `pyproject.toml` requires Python `>=3.15`; use the `.venv` that `uv` creates.
-- `workspace/` holds the data (a ~53 MB parquet file is committed directly; GitHub warns above 50 MB). Do not add more large files without Git LFS.
+- `workspace/` holds the data. `*.parquet` is stored with Git LFS (see `.gitattributes`), so `git-lfs` must be installed before cloning; without it the file is a small text pointer. Add other large formats to `.gitattributes` before committing them.
 - Secrets come from `.env` via `python-dotenv`; never commit it.
-- There is no `.gitignore` yet.

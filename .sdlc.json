@@ -1,0 +1,50 @@
+{
+  "base_branch": "main",
+  "specs_dir": "docs/epics",
+  "architecture": {
+    "doc": "docs/architecture.md",
+    "adr_dir": "docs/adr"
+  },
+  "greenfield": false,
+  "setup": "uv sync",
+  "services": null,
+  "checks": [
+    {
+      "name": "test",
+      "cmd": "uv run --with pytest pytest || [ $? -eq 5 ]"
+    }
+  ],
+  "run": null,
+  "test_globs": [
+    "tests/**",
+    "**/test_*.py",
+    "**/*_test.py"
+  ],
+  "dependency_files": [
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "allowed_bash": [
+    "Bash(pytest *)",
+    "Bash(ruff *)",
+    "Bash(mypy *)",
+    "Bash(uv *)"
+  ],
+  "size_ceiling_loc": 400,
+  "max_fix_rounds": 2,
+  "refine_max_batches": 2,
+  "merge_gate": "epic",
+  "models": {
+    "architect": "fable",
+    "planner": "fable",
+    "designer": "opus",
+    "test_author": "opus",
+    "implementer": "sonnet",
+    "implementer_xs": "haiku",
+    "implementer_fix_round_2": "opus",
+    "reviewer": "opus",
+    "reviewer_high_risk": "fable",
+    "verifier": "sonnet",
+    "fallback": "opus"
+  }
+}

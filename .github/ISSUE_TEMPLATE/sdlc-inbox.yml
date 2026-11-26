@@ -1,0 +1,27 @@
+name: Idea or bug (sdlc inbox)
+description: File an idea or a bug. /sdlc:refine turns it into an epic brief.
+title: "<one line: what you want or what is broken>"
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - Idea
+        - Bug
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: What should exist, or what goes wrong. For a bug, include the steps and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why now
+      description: Who is affected and what it costs to leave it.
+    validations:
+      required: false

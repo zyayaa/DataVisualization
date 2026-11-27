@@ -1,14 +1,6 @@
 """Static tests for item 001/03: what `README.md` tells a new contributor.
 
-The Claude arm is selected by the newest probe verdict record in the epic's
-`decisions.md`, the entry dated 2026-11-26, which reads:
-
-    Verdict: No Claude
-    Tag: v1.108.18
-    Wiring: none
-
-So AC13 checks the "No Claude" arm only; a newer verdict record makes it fail
-until a replan. Statements are matched per README section (the text between
+Statements are matched per README section (the text between
 two Markdown headings), case-insensitively, with whitespace collapsed.
 Each test names the acceptance criterion it checks.
 """
@@ -18,12 +10,7 @@ import re
 
 import pytest
 
-DECISIONS = pathlib.Path("docs/epics/001-docker-compose-stack-with-sandbox-and-li/decisions.md")
 STACK_COMMAND = "STACK_TESTS=1 uv run --with pytest pytest tests/stack -v"
-_VERDICT_RECORD = re.compile(
-    r"^Verdict:[ \t]*(.+?)[ \t]*\nTag:[ \t]*(\S+)[ \t]*\nWiring:[ \t]*(.+?)[ \t]*$",
-    re.MULTILINE,
-)
 _HEADING = re.compile(r"^#{1,6}\s", re.MULTILINE)
 
 
@@ -127,29 +114,11 @@ def test_ac12_gives_the_stack_test_command(readme):
     assert STACK_COMMAND in readme
 
 
-def test_ac13_readme_matches_the_no_claude_verdict(repo_root, readme, sections):
-    """AC13 (No Claude): no Claude model, no token, cites ADR 0003 and 0007 by path,
-    no API-key fallback, and never asks for `CLAUDE_CODE_OAUTH_TOKEN`.
-
-    "Not told to set the token" is checked strictly: the README never names
-    `CLAUDE_CODE_OAUTH_TOKEN` and never mentions `setup-token`.
-    """
-    path = repo_root / DECISIONS
-    assert path.is_file(), f"{DECISIONS} does not exist"
-    records = _VERDICT_RECORD.findall(path.read_text(encoding="utf-8"))
-    if not records:
-        pytest.fail("decisions.md holds no probe verdict record (BLOCKED: the arm is never guessed)")
-    verdict, _, wiring = records[-1]
-    assert (verdict, wiring) == ("No Claude", "none"), (
-        f"the newest verdict is {verdict!r} with wiring {wiring!r}; this test covers only 'No Claude'"
+def test_ac13_readme_describes_the_claude_api_key(sections):
+    """AC13: one section names the `haiku` alias and `ANTHROPIC_API_KEY`."""
+    assert _section_with(sections, r"anthropic_api_key", r"\bhaiku\b"), (
+        "README does not describe the haiku alias and ANTHROPIC_API_KEY"
     )
-    assert _section_with(sections, r"\bno claude models?\b"), "README does not say the proxy has no Claude model"
-    assert _section_with(sections, r"\bno\b(?: [\w-]+){0,3} token"), "README does not say the proxy holds no token"
-    assert _section_with(sections, r"\bno api[- ]key fallback\b"), "README does not say there is no API-key fallback"
-    for number in ("0003", "0007"):
-        assert _adr_path(repo_root, number) in readme, f"README does not cite {_adr_path(repo_root, number)}"
-    assert "CLAUDE_CODE_OAUTH_TOKEN" not in readme, "README names CLAUDE_CODE_OAUTH_TOKEN"
-    assert "setup-token" not in readme, "README mentions setup-token"
 
 
 def test_edge_readme_cites_adr_paths_not_decisions(repo_root, readme):

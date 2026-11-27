@@ -1,2 +1,6 @@
-# No model is defined yet; the proxy starts with the master key and the admin UI only.
-model_list: []
+# Alias the agent asks for; LiteLLM calls Anthropic with the key from .env.
+model_list:
+  - model_name: haiku
+    litellm_params:
+      model: anthropic/claude-haiku-5-5
+      api_key: os.environ/ANTHROPIC_API_KEY

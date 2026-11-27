@@ -28,7 +28,7 @@ The sandbox has no network, no secrets and one read-write mount: `workspace/` at
 
 ## Claude models
 
-The proxy has no Claude model and holds no token. There is no API-key fallback. See `docs/adr/0003-the-proxy-holds-the-claude-subscription-token-behind-a-gate-that-can-stop-the-epic.md` and `docs/adr/0007-the-capability-gate-is-a-live-probe-with-a-direct-control-request-run-before-the-build.md`.
+The proxy serves one alias, `haiku`, mapped in `litellm/config.yaml` to `anthropic/claude-haiku-5-5`. It calls Anthropic with `ANTHROPIC_API_KEY` from `.env`, a pay-as-you-go key from console.anthropic.com; a Claude subscription does not work here.
 
 ## Tests
 

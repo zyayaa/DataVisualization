@@ -1,7 +1,7 @@
 ---
 id: 0004
 title: LiteLLM gets a Postgres database as a third service
-status: proposed      # proposed | accepted | superseded
+status: accepted      # proposed | accepted | superseded
 epic: 001
 supersedes:           # ADR id, when this replaces an accepted decision
 ---

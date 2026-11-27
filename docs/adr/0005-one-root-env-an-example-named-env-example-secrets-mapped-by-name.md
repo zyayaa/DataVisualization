@@ -1,7 +1,7 @@
 ---
 id: 0005
 title: One root .env, an example named env.example, secrets mapped by name
-status: proposed      # proposed | accepted | superseded
+status: accepted      # proposed | accepted | superseded
 epic: 001
 supersedes:           # ADR id, when this replaces an accepted decision
 ---

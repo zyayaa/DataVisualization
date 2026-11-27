@@ -1,7 +1,7 @@
 ---
 id: 0002
 title: Fixed Compose project name; the sandbox is found by labels
-status: proposed      # proposed | accepted | superseded
+status: accepted      # proposed | accepted | superseded
 epic: 001
 supersedes:           # ADR id, when this replaces an accepted decision
 ---

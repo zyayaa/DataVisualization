@@ -1,7 +1,7 @@
 ---
 id: 0003
 title: The proxy holds the Claude subscription token, behind a gate that can stop the epic
-status: proposed      # proposed | accepted | superseded
+status: accepted      # proposed | accepted | superseded
 epic: 001
 supersedes:           # ADR id, when this replaces an accepted decision
 ---

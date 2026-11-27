@@ -1,7 +1,7 @@
 ---
 id: 0001
 title: The sandbox has no network and is controlled through Docker exec
-status: proposed      # proposed | accepted | superseded
+status: accepted      # proposed | accepted | superseded
 epic: 001
 supersedes:           # ADR id, when this replaces an accepted decision
 ---

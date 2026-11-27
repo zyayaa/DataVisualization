@@ -11,7 +11,7 @@ Status: early scaffold. This document describes the repository as it is today. A
 
 | Component | Path | State |
 |---|---|---|
-| Entry point | `main.py` | Implemented (placeholder) |
+| Entry point | `src/main.py` | Implemented (placeholder) |
 | Data workspace | `workspace/` | One dataset committed; nothing reads it |
 | Project metadata | `pyproject.toml`, `uv.lock` | Implemented |
 | Compose stack | `compose.yaml` | Implemented: services `sandbox`, `litellm`, `db` |
@@ -20,7 +20,7 @@ Status: early scaffold. This document describes the repository as it is today. A
 | Example env file | `env.example` | Implemented (names only, no values) |
 | Workflow tooling | `.sdlc.json`, `.claude/settings.json`, `.github/ISSUE_TEMPLATE/sdlc-inbox.yml`, `docs/epics/README.md` | Development process only, not part of the runtime |
 
-### `main.py`
+### `src/main.py`
 
 The whole application, 8 lines:
 
@@ -44,11 +44,11 @@ There is no package, no other module, and no test.
 - `litellm`: the LiteLLM proxy, pinned to the release tag `v1.108.18`. It listens on `127.0.0.1:4000` only, serving an OpenAI-compatible API, the admin UI at `/ui` and an unauthenticated readiness check at `/health/readiness`. The recorded verdict of the capability probe (ADR 0007) is "No Claude": the one probe returned HTTP 429 and the user chose not to configure Claude. So the proxy has no Claude model (`model_list: []`) and holds no subscription token. Configuring Claude later needs a new verdict record. No Anthropic API key is configured anywhere.
 - `db`: Postgres (`postgres:16`) for LiteLLM's own records, with no published port. Its data is in the named volume `litellm_pgdata`. `litellm` starts only once `db` reports healthy.
 
-The agent (`main.py`) is not a container. It runs on the host.
+The agent (`src/main.py`) is not a container. It runs on the host.
 
 ## Boundaries
 
-`main.py` still calls nothing. The stack sets these boundaries for the code that will:
+`src/main.py` still calls nothing. The stack sets these boundaries for the code that will:
 
 - The host may call the proxy at `http://127.0.0.1:4000` with the master key. The proxy is not reachable from the LAN.
 - The host caller never sends an Anthropic credential to the proxy. The proxy forwards no client headers to Anthropic.
@@ -64,7 +64,7 @@ The application has no schema, state object or persisted output. The stack's Pos
 
 ## Dependencies
 
-Runtime: Python `>=3.15`, managed with `uv` (`uv sync` to set up, `uv run python main.py` to run).
+Runtime: Python `>=3.15`, managed with `uv` (`uv sync` to set up, `uv run python src/main.py` to run).
 
 The stack needs Docker Engine with Compose v2, the LiteLLM proxy image (`ghcr.io/berriai/litellm`, pinned to `v1.108.18`) and the Postgres image (`postgres:16`, a major-version tag), both set in `compose.yaml`. Changing the LiteLLM tag means running the capability probe of ADR 0007 again first.
 
@@ -90,7 +90,7 @@ Gaps between the stated intent and what is installed:
 
 ## Configuration and secrets
 
-- `.env` at the repository root is read by Docker Compose (variable substitution) and by `load_dotenv()` in `main.py`. It is git-ignored.
+- `.env` at the repository root is read by Docker Compose (variable substitution) and by `load_dotenv()` in `src/main.py` (it searches upward from `src/`). It is git-ignored.
 - `env.example` lists the names: `LITELLM_MASTER_KEY`, `LITELLM_SALT_KEY`, `UI_USERNAME`, `UI_PASSWORD`, `POSTGRES_PASSWORD`. A `CLAUDE_CODE_OAUTH_TOKEN` would be added only after a "Build with Claude" verdict. It is not named `.env.example` because the project's permission rules deny reading `.env.*`.
 - Each container receives only the variables it is given by name in `compose.yaml`. `sandbox` receives none. Compose refuses to start if any of them is unset.
 - `LITELLM_SALT_KEY` is set once. LiteLLM cannot rotate it in place.

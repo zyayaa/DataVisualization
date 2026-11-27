@@ -34,6 +34,7 @@ services:
       retries: 10
 
   sandbox:
+    container_name: sandbox
     build: ./sandbox
     network_mode: none
     init: true

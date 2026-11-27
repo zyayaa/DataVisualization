@@ -7,3 +7,7 @@
 # Bytecode that Python and pytest regenerate.
 __pycache__/
 *.pyc
+
+# Agent output in workspace/; only the dataset is committed.
+workspace/*
+!workspace/dataset.parquet

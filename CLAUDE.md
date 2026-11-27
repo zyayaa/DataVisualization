@@ -7,6 +7,8 @@ LangChain/LangGraph project for data visualization (early scaffold). Python, man
 - Setup: `uv sync`
 - Test: `uv run --with pytest pytest`. Static tests live in `tests/`. The stack suite in `tests/stack/` is skipped unless `STACK_TESTS=1` and only a person runs it (it needs Docker and `.env`). The exit-5 tolerance in `.sdlc.json` no longer has an effect; only the user can remove it, on the base branch.
 - Run: `uv run python main.py`
+- Stack: copy `env.example` to `.env` and fill it in, then `docker compose up -d` (litellm, db, sandbox); `docker compose down` stops it (`down -v` deletes the `litellm_pgdata` database volume).
+- Stack tests (person only): `STACK_TESTS=1 uv run --with pytest pytest tests/stack -v`
 
 ## Traps
 

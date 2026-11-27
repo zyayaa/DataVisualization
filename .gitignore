@@ -1,1 +1,5 @@
 .idea/
+
+# Secrets: only env.example is committed
+.env
+.env.*

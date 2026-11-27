@@ -50,7 +50,8 @@ def secrets(repo_root):
 @pytest.fixture(scope="session")
 def stack_up(docker_compose):
     result = docker_compose("up", "-d", timeout=15 * 60)
-    assert result.returncode == 0, "docker compose up -d failed"
+    started = result.returncode == 0
+    assert started, "docker compose up -d failed"
     deadline = time.monotonic() + 300
     status = None
     while time.monotonic() < deadline:

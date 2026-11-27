@@ -87,7 +87,8 @@ def test_proxy_port_is_loopback_only(stack_up, docker_compose):
     raw = _inspect(cid, "{{json .NetworkSettings.Ports}}")
     bindings = json.loads(raw).get("4000/tcp") or []
     hosts = {b.get("HostIp") for b in bindings}
-    assert bindings and hosts <= {"127.0.0.1"}
+    loopback_only = bool(bindings) and hosts <= {"127.0.0.1"}
+    assert loopback_only
 
 
 def test_compose_refuses_an_empty_env(docker_compose):
@@ -98,5 +99,6 @@ def test_compose_refuses_an_empty_env(docker_compose):
         name in result.stderr
         for name in ("LITELLM_MASTER_KEY", "LITELLM_SALT_KEY", "UI_USERNAME", "UI_PASSWORD", "POSTGRES_PASSWORD")
     )
-    assert result.returncode != 0
+    refused = result.returncode != 0
+    assert refused
     assert names_missing_variable

@@ -3,3 +3,7 @@
 # Secrets: only env.example is committed
 .env
 .env.*
+
+# Bytecode that Python and pytest regenerate.
+__pycache__/
+*.pyc

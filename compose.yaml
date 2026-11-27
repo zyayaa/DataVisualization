@@ -32,5 +32,12 @@ services:
       timeout: 5s
       retries: 10
 
+  sandbox:
+    build: ./sandbox
+    network_mode: none
+    init: true
+    volumes:
+      - ./workspace:/workspace
+
 volumes:
   litellm_pgdata:

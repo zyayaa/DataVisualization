@@ -11,6 +11,7 @@ services:
       LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:?set LITELLM_SALT_KEY in .env}
       UI_USERNAME: ${UI_USERNAME:?set UI_USERNAME in .env}
       UI_PASSWORD: ${UI_PASSWORD:?set UI_PASSWORD in .env}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY in .env}
       DATABASE_URL: postgresql://litellm:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/litellm
     volumes:
       - ./litellm/config.yaml:/app/config.yaml:ro

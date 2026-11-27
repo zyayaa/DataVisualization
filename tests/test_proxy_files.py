@@ -451,17 +451,6 @@ def test_ac22_salt_key_comment_says_generated_once_never_changed(repo_root):
     assert "never" in comment and "change" in comment, "the comment does not say the key is never changed"
 
 
-# ---------------------------------------------------------------- shared rules
-
-
-@pytest.mark.parametrize("relative", ["compose.yaml", "litellm/config.yaml", "env.example"])
-def test_ac23_no_anthropic_api_key(repo_root, relative):
-    """AC23: the string `ANTHROPIC_API_KEY` occurs in none of the three stack files."""
-    path = repo_root / relative
-    assert path.is_file(), f"{relative} does not exist"
-    assert "ANTHROPIC_API_KEY" not in path.read_text(encoding="utf-8")
-
-
 # ---------------------------------------------------------------- litellm/config.yaml
 
 

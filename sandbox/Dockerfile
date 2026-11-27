@@ -13,9 +13,7 @@ RUN pip install --no-cache-dir \
     seaborn \
     matplotlib \
     scipy \
-    xlrd \
-    python-calamine \
-    openpyxl \
+    pyarrow \
     tabulate
 
 # Criar utilizador não-root por segurança

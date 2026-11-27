@@ -33,9 +33,18 @@ def docker_compose(repo_root):
     return run
 
 
+class _Secrets(dict):
+    """The values of .env. The repr hides them, so a failure report never prints them."""
+
+    def __repr__(self):
+        return "<secrets hidden>"
+
+    __str__ = __repr__
+
+
 @pytest.fixture(scope="session")
 def secrets(repo_root):
-    return dotenv_values(repo_root / ".env")
+    return _Secrets(dotenv_values(repo_root / ".env"))
 
 
 @pytest.fixture(scope="session")

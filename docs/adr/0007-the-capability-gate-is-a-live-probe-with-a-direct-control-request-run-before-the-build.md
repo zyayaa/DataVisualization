@@ -1,7 +1,7 @@
 ---
 id: 0007
 title: The capability gate is a live probe with a direct control request, run before the build
-status: proposed      # proposed | accepted | superseded
+status: accepted      # proposed | accepted | superseded
 epic: 001
 supersedes:           # ADR id, when this replaces an accepted decision
 ---

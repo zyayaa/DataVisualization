@@ -71,3 +71,72 @@ Wiring: none
 G2a was run once by the user, with the headers of fact-sheet rows 10 and 11, against `claude-haiku-5-5`. It returned HTTP 429 with the body `{"type":"error","error":{"type":"rate_limit_error","message":"Error"}}`. Under ADR 0007 a 429 alone is not a verdict. The user decided instead, in their words: "do not configure claude for litellm. Let's just deploy litellm and I will investigate".
 So item 01 pins `ghcr.io/berriai/litellm:v1.108.18`, item 02 builds the "No Claude" arm (no model, no token, guard tests only), and item 03 writes the README's "No Claude" arm.
 Configuring Claude later needs a new verdict record and a replan, or a new epic, after the user's investigation.
+
+## 2026-11-27 · block-answer
+<!-- sdlc:entry block-answer 001/01 1 -->
+Item 001/01 (pull request #5) stopped on a question from the reviewer:
+
+> The reviewer says a locked test contradicts its criterion: tests/__pycache__/conftest.cpython-315-pytest-9.2.0.pyc: The locked test set, pinned by hash in lock.json, includes two bytecode files written by the test author (tests/__pycache__/conftest...pyc and test_proxy_files...pyc) that pytest regenerates. Should the test author amend the test? Answer yes to amend it, or say what should happen instead.
+
+**Answer from the user:**
+
+> yes
+
+The locked test is to be amended: the test author runs next and a new lock is recorded.
+
+
+## 2026-11-27 · test-amendment
+<!-- sdlc:entry test-amendment 001/01 1 -->
+Item 001/01 (pull request #5): a locked test was amended after the user agreed it contradicted its criterion. The lock at `978ba90` was replaced.
+
+## 2026-11-27 · block-answer
+<!-- sdlc:entry block-answer 001/02 1 -->
+Item 001/02 (pull request #6) stopped on a question from the implementer:
+
+> the implementer stopped without finishing; it may have reached its turn limit. Its last words: Skipped: the stack-suite tests have never run against a live stack. Their wording may need a fix after the person's first `STACK_TESTS=1` run.
+
+**Answer from the user:**
+
+> The No Claude verdict stands. The work is finished; the report only had an extra line after DONE. Continue.
+
+
+## 2026-11-27 · follow-up
+<!-- sdlc:entry follow-up 001/02 1 -->
+From item 001/02 (pull request #6): The stack-suite tests have never run against a live stack. Their wording may need a fix after the person's first `STACK_TESTS=1` run.
+
+## 2026-11-27 · retro
+<!-- sdlc:entry retro ec6cd3c -->
+Every item is merged into `epic/001-docker-compose-stack-with-sandbox-and-li`. What the verifier saw for each "Done when" check, at `ec6cd3c`:
+
+- **D1** Running `docker compose up -d` from the repo root leaves both `sandbox` and `litellm` running.
+  - pass: I ran `docker compose up -d` from the repo root. The sandbox, litellm and db containers were already running, so it reported them as Running and the db as Healthy. `docker compose ps` showed sandbox Up, litellm Up on 127.0.0.1:4000->4000, and db Up (healthy). I did not test a cold start from a stopped stack.
+- **D2** `ls /workspace` inside the sandbox shows the parquet file, and a file the sandbox user creates in `/workspace` appears in `workspace/` on the host.
+  - pass: `docker compose exec sandbox ls -l /workspace` listed consumo_horario_mobilidade_eletrica_01_a_10.parquet (55305706 bytes, the same size as on the host, so it is the real file and not an LFS pointer). `id` showed uid=1000(sandboxuser). As that user, `touch /workspace/obs_test.txt` succeeded, and the file appeared in the host `workspace/` folder. I then deleted it.
+- **D3** An outbound network request made from inside the sandbox fails.
+  - pass: In the sandbox I ran a Python urllib request to https://example.com with a 5-second timeout. It failed with 'Temporary failure in name resolution'. The compose file sets network_mode: none for the sandbox.
+- **D4** The proxy's Claude set-up matches the recorded result of the token test, and no `ANTHROPIC_API_KEY` is set anywhere: if the test passed, a chat-completion request on `localhost` with the master key gets a Claude reply; if Anthropic blocked it, the proxy offers no Claude model and holds no subscription token.
+  - pass: The recorded verdict in the epic's decisions.md is 'No Claude'. GET /v1/models with the master key returned {"data":[],"object":"list"}, so no Claude model is offered. A chat completion for model 'sonnet' with the master key returned 400 'Invalid model name'. The string ANTHROPIC appears nowhere in .env, env.example, compose.yaml or litellm/config.yaml, and the litellm container environment has no ANTHROPIC variable. The config is `model_list: []`. I did not read .env for any token value, only grepped it for the count of ANTHROPIC matches, which was 0.
+- **D5** The same request without the master key, or with a wrong one, gets a 401.
+  - pass: POST /v1/chat/completions on localhost:4000 with no Authorization header returned 401 'No api key passed in'. With 'Bearer sk-wrong' it returned 401 'Invalid API key provided'.
+- **D6** The LiteLLM UI on `localhost` accepts a login with the admin credentials from `.env`.
+  - pass: GET /ui/ returned 200. POST /v2/login with UI_USERNAME and UI_PASSWORD from .env returned a token and the redirect http://localhost:4000/ui?login=success. A form POST to /login returned 303 to /ui?login=success. The same form POST with a wrong password returned 401. I did not drive a real browser.
+
+| Item | Fix rounds | Questions | Findings (80+) | Test amendments | Paused for you |
+| --- | --- | --- | --- | --- | --- |
+| 001/01 The proxy, its database and the admin UI start from the env file and refuse callers without the master key | 3 (review 3) | 1 | 12 (4) | 1 | yes |
+| 001/02 The proxy's Claude set-up matches the recorded result of the token test | 0 | 1 | 1 (0) | 0 | yes |
+| 001/03 The sandbox runs beside the proxy with no network and the workspace mounted, and the stack is documented | 0 | 0 | 1 (0) | 0 | yes |
+
+| Measure | Value |
+| --- | --- |
+| Items | 3 |
+| Items that needed rework | 1 (33%) |
+| Fix rounds | 3 |
+| Questions that stopped an item | 2 |
+| Items you merged yourself | 3 |
+| Review findings, of which at confidence 80 or more | 14, 4 |
+| Test amendments | 1 |
+| Items with no failed check on GitHub | 3 of 3 |
+| Items from your review of the epic | 0 |
+| Spec pull requests after the first | 0 |
+| Worker time: test author, implementer, reviewer, verifier | 19 min, 13.2 min, 52 min, - |

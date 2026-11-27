@@ -1,7 +1,7 @@
 ---
 id: 0006
 title: The sandbox runs as the image's user, with no user remapping
-status: proposed      # proposed | accepted | superseded
+status: accepted      # proposed | accepted | superseded
 epic: 001
 supersedes:           # ADR id, when this replaces an accepted decision
 ---

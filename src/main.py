@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 
 from agents.developer import Developer
+from agents.reviewer import Reviewer
 
 load_dotenv()
 
@@ -21,20 +22,23 @@ if not litellmMasterKey:
 
 if __name__ == "__main__":
     developerAgent = Developer(litellmUrl, litellmMasterKey)
+    reviewerAgent = Reviewer(litellmUrl, litellmMasterKey)
 
     graph_builder = StateGraph(AgentState)
     graph_builder.add_node("developer", developerAgent.node)
     graph_builder.add_node("developer_tools", ToolNode(developerAgent.tools))
+    graph_builder.add_node("reviewer", reviewerAgent.node)
 
     graph_builder.add_edge(START, "developer")
     graph_builder.add_conditional_edges("developer", developerAgent.next)
     graph_builder.add_edge("developer_tools", "developer")
+    graph_builder.add_conditional_edges("reviewer", reviewerAgent.next)
 
     graph = graph_builder.compile()
 
     request = (
         "Explore all .parquet files in /workspace folder. "
-        "Focus only on Vila Nova de Famalicao data"
+        "Focus only on \"Vila Nova de Famalicao\" data"
         "Cross data found, identify the principal trends and anomalies, "
         "generate 2 charts in Seaborn that summarize the most important findings"
     )

@@ -1,4 +1,4 @@
-from typing import Sequence, Literal
+from typing import Literal
 
 from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
@@ -56,8 +56,8 @@ class Developer:
         return {"messages":[answer]}
 
     @staticmethod
-    def next(state: AgentState) -> Literal["developer_tools", "__end__"]:
+    def next(state: AgentState) -> Literal["developer_tools", "reviewer"]:
         last_message = state["messages"][-1]
         if last_message.tool_calls:
             return "developer_tools"
-        return "__end__"
+        return "reviewer"

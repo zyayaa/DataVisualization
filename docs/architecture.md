@@ -32,7 +32,7 @@ There is no package, no other module, and no test.
 
 ### `workspace/`
 
-- `workspace/consumo_horario_mobilidade_eletrica_01_a_10.parquet`, about 53 MB, stored with Git LFS (`.gitattributes` tracks `*.parquet`).
+- `workspace/dataset.parquet`, about 53 MB, stored with Git LFS (`.gitattributes` tracks `*.parquet`).
 - By its file name it holds hourly electric-mobility (EV charging) consumption. Its schema, time range and the meaning of `01_a_10` are not documented in the repository and no code inspects them.
 - **Intent:** `WORKSPACE_PATH` suggests this folder is where the system will read data from (and possibly write to). That is not implemented.
 

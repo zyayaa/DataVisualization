@@ -11,7 +11,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 PROJECT = "data-visualization-agent"
-DATASET = "consumo_horario_mobilidade_eletrica_01_a_10.parquet"
+DATASET = "dataset.parquet"
 LABELS = ("--filter", f"label=com.docker.compose.project={PROJECT}", "--filter", "label=com.docker.compose.service=sandbox")
 
 

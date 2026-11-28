@@ -1,11 +1,13 @@
 import os
 
 from dotenv import load_dotenv
+load_dotenv()
+
+from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
 
 from agents.developer import Developer
 from agents.reviewer import Reviewer
-
-load_dotenv()
 
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import HumanMessage
@@ -21,8 +23,15 @@ if not litellmMasterKey:
     raise ValueError("Environment variable LITELLM_MASTER_KEY not set")
 
 if __name__ == "__main__":
-    developerAgent = Developer(litellmUrl, litellmMasterKey)
-    reviewerAgent = Reviewer(litellmUrl, litellmMasterKey)
+    llm = ChatOpenAI(
+            model="haiku",
+            base_url=litellmUrl,
+            api_key=SecretStr(litellmMasterKey),
+            max_retries=2
+        )
+
+    developerAgent = Developer(llm)
+    reviewerAgent = Reviewer(llm)
 
     graph_builder = StateGraph(AgentState)
     graph_builder.add_node("developer", developerAgent.node)

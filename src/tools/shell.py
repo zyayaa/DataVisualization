@@ -1,10 +1,11 @@
 from langchain_core.tools import tool
+
 from tools.sandbox import sandbox
 
 
 @tool
 def execute_command(command: str) -> str:
-    """Excutes a bash command inside the Docker container in /workspace and returns the result.
+    """Executes a bash command inside the Docker container in /workspace and returns the result.
     If the Python script fails, it returns the full Traceback so you can fix the code."""
     container = sandbox()
     safe_cmd = ["timeout", "30s", "bash", "-c", command]

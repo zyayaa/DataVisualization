@@ -1,11 +1,10 @@
 import base64
 import glob
 import os
-from typing import Literal
+from typing import Literal, cast
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
-from langgraph.constants import END
 from pydantic import BaseModel, Field
 
 from agents.agentstate import AgentState
@@ -57,7 +56,7 @@ class Reviewer:
                 "attempts": current_attempt,
             }
 
-        content_blocks = []
+        content_blocks: list[str | dict] = []
 
         files_inspected = []
         for path in png_files:
@@ -73,7 +72,7 @@ class Reviewer:
             print(f"[INFO] Sending {files_inspected} to inspect (Try {current_attempt}).")
             print("=" * 70)
 
-        evaluation: VisualReview = self.__llm.invoke([SystemMessage(content=""), HumanMessage(content=content_blocks)])
+        evaluation = cast(VisualReview, self.__llm.invoke([SystemMessage(content=self.__role), HumanMessage(content=content_blocks)]))
 
         if evaluation.approved:
             print(f"[INFO] Visual QA approved on try {current_attempt}.")
@@ -105,8 +104,8 @@ class Reviewer:
 
     def next(self, state: AgentState) -> Literal["developer", "__end__"]:
         if state.get("approved", False):
-            return END
+            return "__end__"
         if state.get("attempts", 0) >= self.__max_reviews:
             print("[INFO] Maximum visual review attempts reached. Ending process.")
-            return END
+            return "__end__"
         return "developer"

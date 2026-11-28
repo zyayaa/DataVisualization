@@ -1,7 +1,7 @@
 from typing import Literal
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import AIMessage, SystemMessage
 
 from agents.agentstate import AgentState
 from tools.filesystem import list_workspace_files, save_python_script
@@ -52,6 +52,6 @@ class Developer:
     @staticmethod
     def next(state: AgentState) -> Literal["developer_tools", "reviewer"]:
         last_message = state["messages"][-1]
-        if last_message.tool_calls:
+        if isinstance(last_message, AIMessage) and last_message.tool_calls:
             return "developer_tools"
         return "reviewer"

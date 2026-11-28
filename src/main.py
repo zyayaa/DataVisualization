@@ -33,7 +33,8 @@ if __name__ == "__main__":
     developerAgent = Developer(llm)
     reviewerAgent = Reviewer(llm)
 
-    graph_builder = StateGraph(AgentState)
+    # ty cannot match a TypedDict to LangGraph's StateLike protocol; pyright and mypy accept it
+    graph_builder = StateGraph(AgentState)  # ty: ignore[invalid-argument-type]
     graph_builder.add_node("developer", developerAgent.node)
     graph_builder.add_node("developer_tools", ToolNode(developerAgent.tools))
     graph_builder.add_node("reviewer", reviewerAgent.node)
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     config = RunnableConfig(recursion_limit=100)
 
     for event in graph.stream(
-            {"messages": [humanMessage]},
+            AgentState(messages=[humanMessage], approved=False, attempts=0),
             config=config,
             stream_mode="values",
     ):

@@ -1,8 +1,7 @@
 from typing import Literal
 
+from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import SystemMessage
-from langchain_openai import ChatOpenAI
-from pydantic import SecretStr
 
 from agents.agentstate import AgentState
 from tools.filesystem import list_workspace_files, save_python_script
@@ -10,15 +9,10 @@ from tools.shell import execute_command
 
 
 class Developer:
-    def __init__(self, base_url: str, api_key: str):
+    def __init__(self, llm: BaseChatModel):
         self.tools = [list_workspace_files, save_python_script, execute_command]
-        self.__llm = ChatOpenAI(
-            model="haiku",
-            base_url=base_url,
-            api_key=SecretStr(api_key),
-            max_retries=2
-        ).bind_tools(self.tools)
-        self.__prompt = """You are a Data Engineer Agent and Python Data Visualization Specialist.
+        self.__llm = llm.bind_tools(self.tools)
+        self.__role = """You are a Data Engineer Agent and Python Data Visualization Specialist.
             You work inside a secure Docker container in the `/workspace` folder.
 
             Strictly follow this work cycle (Agentic Loop):
@@ -50,7 +44,7 @@ class Developer:
     def node(self, state: AgentState) -> dict:
         messages = state["messages"]
         if not messages or not isinstance(messages[0], SystemMessage):
-            messages = [SystemMessage(content=self.__prompt)] + messages
+            messages = [SystemMessage(content=self.__role)] + messages
 
         answer = self.__llm.invoke(messages)
         return {"messages":[answer]}

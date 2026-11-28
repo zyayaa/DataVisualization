@@ -3,10 +3,10 @@ import glob
 import os
 from typing import Literal
 
-from langchain_core.messages import HumanMessage
-from langchain_openai import ChatOpenAI
+from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.constants import END
-from pydantic import SecretStr, BaseModel, Field
+from pydantic import BaseModel, Field
 
 from agents.agentstate import AgentState
 
@@ -27,15 +27,20 @@ class VisualReview(BaseModel):
         description="Exact instructions of python/seaborn/matplotlib to fix issues on next iteration."
     )
 
+
 class Reviewer:
-    def __init__(self, base_url: str, api_key: str):
-        self.__llm = ChatOpenAI(
-            model="haiku",
-            base_url=base_url,
-            api_key=SecretStr(api_key),
-            max_retries=2
-        ).with_structured_output(VisualReview)
-        self.__max_reviews = 2
+    def __init__(self, llm: BaseChatModel):
+        self.__llm = llm.with_structured_output(VisualReview)
+        self.__max_reviews = 10
+        self.__role = (
+            "You are a Senior Data Visualization Reviewer (Visual QA). "
+            "Rigorously inspect each PNG image below and check:\n"
+            "1. Are there overlapping axis labels, numbers on top of bars hitting the top/title, or legends covering data?\n"
+            "2. Is there any intruding category such as 'ALL' or 'GRAND TOTAL' that distorts the scale?\n"
+            "3. Are the titles, legends and axes clear and well formatted?\n"
+            "Be strict: if you find any visual or readability defect, reject it (approved=False) "
+            "and explain which Seaborn/Matplotlib parameters the agent should adjust."
+        )
 
     def node(self, state: AgentState) -> dict:
         current_attempt = state.get("attempts", 0) + 1
@@ -52,20 +57,7 @@ class Reviewer:
                 "attempts": current_attempt,
             }
 
-        content_blocks = [
-            {
-                "type": "text",
-                "text": (
-                    "You are a Senior Data Visualization Reviewer (Visual QA). "
-                    "Rigorously inspect each PNG image below and check:\n"
-                    "1. Are there overlapping axis labels, numbers on top of bars hitting the top/title, or legends covering data?\n"
-                    "2. Is there any intruding category such as 'ALL' or 'GRAND TOTAL' that distorts the scale?\n"
-                    "3. Are the titles, legends and axes clear and well formatted?\n"
-                    "Be strict: if you find any visual or readability defect, reject it (approved=False) "
-                    "and explain which Seaborn/Matplotlib parameters the agent should adjust."
-                ),
-            }
-        ]
+        content_blocks = []
 
         files_inspected = []
         for path in png_files:
@@ -81,7 +73,7 @@ class Reviewer:
             print(f"[INFO] Sending {files_inspected} to inspect (Try {current_attempt}).")
             print("=" * 70)
 
-        evaluation: VisualReview = self.__llm.invoke([HumanMessage(content=content_blocks)])
+        evaluation: VisualReview = self.__llm.invoke([SystemMessage(content=""), HumanMessage(content=content_blocks)])
 
         if evaluation.approved:
             print(f"[INFO] Visual QA approved on try {current_attempt}.")
